@@ -1,0 +1,57 @@
+body {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  width: 100vw;
+  height: 100vh;
+}
+
+h1 {
+  text-align: center;
+}
+
+.container {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 20px;
+}
+
+.card {
+  border: 2px solid orange;
+  border-radius: 20px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-weight: bold;
+}
+
+.card:hover .img-container {
+  transform: scale(1.1);
+}
+
+.img-container {
+  width: 150px;
+  height: 150px;
+  overflow: hidden;
+  transition: transform 0.2s ease;
+}
+
+img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+span {
+  background-color: crimson;
+  color: white;
+  border-radius: 5px;
+  margin-left: 5px;
+  font-weight: normal;
+}
+
+.price {
+  color: coral;
+}
