@@ -1,0 +1,91 @@
+body {
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #9b5de5;
+}
+
+main {
+  box-sizing: border-box;
+  background-color: white;
+  border-radius: 30px;
+  aspect-ratio: 3/2;
+  width: 700px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 30px 40px 50px 40px;
+}
+
+.timer-container {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.time-bar {
+  border-radius: 15px;
+  height: 30px;
+  background-color: #9b5de5;
+}
+
+.time-text {
+  font-size: 18px;
+  font-weight: bold;
+  color: #9b5de5;
+  text-align: center;
+}
+
+h1 {
+  margin: 0;
+}
+
+.answers {
+  display: flex;
+  gap: 50px;
+  margin-top: auto;
+}
+
+.answers button {
+  font-weight: bold;
+  font-size: 36px;
+  padding: 50px 60px;
+  border-radius: 20px;
+  border: 2px solid #9b5de5;
+  background-color: white;
+  cursor: pointer;
+}
+
+.result {
+  font-size: 120px;
+}
+
+.totalResult {
+  font-size: 100px;
+}
+
+.retry {
+  background-color: #9b5de5;
+  border: none;
+  border-radius: 25px;
+  padding: 15px 35px;
+  color: white;
+  cursor: pointer;
+  margin-top: 20px;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.green {
+  color: #06d6a0;
+}
+
+.red {
+  color: #ef476f;
+}
