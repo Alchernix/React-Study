@@ -1,4 +1,5 @@
-import { useReducer, useState } from "react";
+import { useState } from "react";
+import { useImmerReducer } from "use-immer";
 import "./App.css";
 
 const initialBoards = [
@@ -34,13 +35,46 @@ function Board({ board, children }) {
     </section>
   );
 }
-// boardId context로 넘기기...
-function Note({ note, boardId, onEditContent }) {
+
+function Note({ note, onEditContent, onMove, onRemove }) {
   const [isEditing, setIsEditing] = useState(false);
+  const [lastCoordinates, setLastCoordinates] = useState(null);
+
+  function handleMouseDown(e) {
+    e.target.setPointerCapture(e.pointerId);
+    setLastCoordinates({
+      x: e.clientX,
+      y: e.clientY,
+    });
+  }
+
+  function handleMouseMove(e) {
+    if (lastCoordinates) {
+      setLastCoordinates({
+        x: e.clientX,
+        y: e.clientY,
+      });
+      onMove(note.id, e.movementX, e.movementY);
+    }
+  }
+
+  function handleMouseUp(e) {
+    setLastCoordinates(null);
+  }
 
   return (
     <div className="note" style={note.style}>
-      <div className="note-handle"></div>
+      <div
+        className="note-handle"
+        onPointerDown={handleMouseDown}
+        onPointerMove={handleMouseMove}
+        onPointerUp={handleMouseUp}
+      >
+        <i
+          className="fa-solid fa-xmark remove-note-btn"
+          onClick={() => onRemove(note.id)}
+        ></i>
+      </div>
       {isEditing ? (
         <textarea
           value={note.content}
@@ -49,7 +83,7 @@ function Note({ note, boardId, onEditContent }) {
             setIsEditing(false);
           }}
           onChange={(e) => {
-            onEditContent(boardId, note.id, e.target.value);
+            onEditContent(note.id, e.target.value);
           }}
           className="note-content-input"
         ></textarea>
@@ -68,10 +102,10 @@ function Note({ note, boardId, onEditContent }) {
 }
 
 export default function App() {
-  const [boardStates, dispatch] = useReducer(boardsReducer, initialState);
+  const [draft, dispatch] = useImmerReducer(boardsReducer, initialState);
 
-  const currentBoard = boardStates.boards.find(
-    (board) => board.id === boardStates.currentBoardId
+  const currentBoard = draft.boards.find(
+    (board) => board.id === draft.currentBoardId
   );
 
   function handlechangeBoard(boardId) {
@@ -81,26 +115,40 @@ export default function App() {
     });
   }
 
-  function handleAddNote(boardId) {
+  function handleAddNote() {
     dispatch({
       type: "add_note",
-      boardId,
     });
   }
 
-  function handleEditNoteContent(boardId, noteId, content) {
+  function handleEditNoteContent(noteId, content) {
     dispatch({
       type: "edit_note_content",
-      boardId,
       noteId,
       content,
+    });
+  }
+
+  function handleMoveNote(noteId, dx, dy) {
+    dispatch({
+      type: "move_note",
+      noteId,
+      dx,
+      dy,
+    });
+  }
+
+  function handleRemoveNote(noteId) {
+    dispatch({
+      type: "remove_note",
+      noteId,
     });
   }
 
   return (
     <main>
       <div className="btn-container">
-        {boardStates.boards.map((board) => (
+        {draft.boards.map((board) => (
           <button
             key={board.id + "btn"}
             onClick={() => handlechangeBoard(board.id)}
@@ -109,78 +157,73 @@ export default function App() {
           </button>
         ))}
       </div>
-      <Board key={boardStates.currentBoardId} board={currentBoard}>
+      <Board key={draft.currentBoardId} board={currentBoard}>
         {currentBoard.notes.map((note) => (
           <Note
             key={note.id}
             note={note}
-            boardId={boardStates.currentBoardId}
             onEditContent={handleEditNoteContent}
+            onMove={handleMoveNote}
+            onRemove={handleRemoveNote}
           />
         ))}
       </Board>
-      <button onClick={() => handleAddNote(boardStates.currentBoardId)}>
-        Add new note
-      </button>
+      <button onClick={() => handleAddNote()}>Add new note</button>
     </main>
   );
 }
 
-function boardsReducer(boardStates, action) {
+function boardsReducer(draft, action) {
   switch (action.type) {
     case "change_board": {
-      return {
-        ...boardStates,
-        currentBoardId: action.boardId,
-      };
+      draft.currentBoardId = action.boardId;
+      break;
     }
     case "add_note": {
-      const newBoards = boardStates.boards.map((board) => {
-        if (boardStates.currentBoardId !== board.id) {
-          return board;
-        } else {
-          const newNoteId = board.currentNoteIdx + 1;
-          const newNote = {
-            id: newNoteId,
-            content: "",
-            style: { top: "150px", left: "225px" },
-          };
-          const newBoard = {
-            ...board,
-            notes: [...board.notes, newNote],
-            currentNoteIdx: newNoteId,
-          };
+      const board = draft.boards.find(
+        (board) => board.id === draft.currentBoardId
+      );
 
-          return newBoard;
-        }
+      const newNoteId = board.currentNoteIdx + 1;
+      board.notes.push({
+        id: newNoteId,
+        content: "",
+        style: { top: "150px", left: "225px" },
       });
-
-      return {
-        ...boardStates,
-        boards: newBoards,
-      };
+      board.currentNoteIdx = newNoteId;
+      break;
     }
     case "edit_note_content": {
-      const newBoards = boardStates.boards.map((board) => {
-        if (boardStates.currentBoardId !== board.id) {
-          return board;
-        } else {
-          const newNotes = board.notes.map((note) => {
-            if (note.id !== action.noteId) {
-              return note;
-            } else {
-              const newNote = { ...note, content: action.content };
-              return newNote;
-            }
-          });
-          return { ...board, notes: newNotes };
-        }
-      });
+      const board = draft.boards.find(
+        (board) => board.id === draft.currentBoardId
+      );
+      const note = board.notes.find((note) => note.id === action.noteId);
 
-      return {
-        ...boardStates,
-        boards: newBoards,
-      };
+      note.content = action.content;
+      break;
+    }
+    case "move_note": {
+      const board = draft.boards.find(
+        (board) => board.id === draft.currentBoardId
+      );
+      const note = board.notes.find((note) => note.id === action.noteId);
+
+      const currentTop = parseInt(note.style.top, 10);
+      const currentLeft = parseInt(note.style.left, 10);
+
+      const newTop = Math.min(400 - 150, Math.max(0, currentTop + action.dy));
+      const newLeft = Math.min(550 - 120, Math.max(0, currentLeft + action.dx));
+
+      note.style.top = newTop;
+      note.style.left = newLeft;
+      break;
+    }
+    case "remove_note": {
+      const board = draft.boards.find(
+        (board) => board.id === draft.currentBoardId
+      );
+      board.notes = board.notes.filter((note) => note.id !== action.noteId);
+      break;
     }
     default: {
       throw Error("Unknown action: " + action.type);
