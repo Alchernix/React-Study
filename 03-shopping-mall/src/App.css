@@ -1,0 +1,243 @@
+#root {
+  width: 100%;
+  height: 100%;
+}
+
+.layout-container {
+  width: 100%;
+  display: grid;
+  grid-template-rows: 100px 1fr;
+  grid-template-columns: 250px 1fr;
+  grid-template-areas:
+    "header  header"
+    "sidebar main";
+  height: 100vh;
+}
+
+.layout-container-detail {
+  width: 100%;
+  display: grid;
+  grid-template-rows: 100px 1fr;
+  grid-template-areas:
+    "header"
+    "detail";
+  height: 100vh;
+}
+
+.img-container {
+  border-radius: 15px;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  transition: transform 0.2s ease;
+}
+
+img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.item-name {
+  font-weight: bold;
+}
+
+.price {
+  font-weight: bold;
+  color: red;
+}
+
+button {
+  font-weight: bold;
+  font-family: inherit;
+  font-size: inherit;
+  cursor: pointer;
+}
+
+/* 헤더 */
+header {
+  box-sizing: border-box;
+  grid-area: header;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0px 30px;
+  height: 100px;
+  gap: 20px;
+  background-color: white;
+}
+
+h1 {
+  margin: 0;
+  cursor: pointer;
+}
+
+.search-container {
+  flex-grow: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  border: 2px solid #3a86ff;
+  background-color: white;
+  border-radius: 5px;
+  padding: 3px 5px;
+}
+
+.search-container input {
+  font-family: inherit;
+  font-size: inherit;
+  flex-grow: 1;
+  border: none;
+  padding: 0;
+}
+
+.basket-btn {
+  font-size: 20px;
+  cursor: pointer;
+}
+
+/* 사이드바 */
+nav {
+  box-sizing: border-box;
+  grid-area: sidebar;
+  margin: 30px 15px 30px 30px;
+  padding: 20px;
+  border-radius: 20px;
+  background-color: white;
+}
+
+nav ul {
+  padding: 0;
+  margin: 0;
+  list-style-type: none;
+}
+
+nav li {
+  padding: 5px 10px;
+  text-align: center;
+  cursor: pointer;
+}
+
+nav li:hover {
+  text-decoration: underline;
+}
+
+nav .selected {
+  font-weight: bold;
+  text-decoration: underline;
+}
+
+/* 메인 */
+.main {
+  border-radius: 20px;
+  margin: 30px 30px 30px 15px;
+  grid-area: main;
+  background-color: white;
+}
+
+.main .item-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, 200px);
+  gap: 15px;
+  justify-content: center;
+}
+
+.main-item {
+  cursor: pointer;
+  width: 200px;
+  height: 240px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.main-item .item-name {
+  font-weight: bold;
+}
+
+.main-item .img-container {
+  width: 170px;
+}
+
+/* 상세보기 */
+.detail {
+  grid-area: detail;
+  margin: 30px;
+  border-radius: 20px;
+  background-color: white;
+  padding: 80px 20px;
+  display: flex;
+  justify-content: center;
+}
+
+.detail-layout-container {
+  max-width: 800px;
+  height: 100%;
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  justify-content: center;
+  gap: 30px;
+}
+
+.detail-text {
+  height: 100%;
+  box-sizing: border-box;
+  padding-right: 30px;
+  display: flex;
+  flex-direction: column;
+  font-size: 20px;
+}
+
+.detail-inner1 {
+  margin-bottom: auto;
+  padding-bottom: 20px;
+  border-bottom: 2px solid #eee;
+}
+
+.detail-inner1,
+.detail-inner2 {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.detail .price {
+  text-align: right;
+}
+
+.detail .btn-container {
+  align-self: center;
+  display: flex;
+  gap: 15px;
+  border: 1px solid #eee;
+}
+
+.detail .btn-container button {
+  background-color: #eee;
+  border: none;
+  width: 35px;
+  height: 35px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.put-in-basket-btn {
+  color: white;
+  background-color: #3a86ff;
+  border: none;
+  border-radius: 5px;
+  padding: 5px 0px;
+}
+.put-in-basket-btn:disabled {
+  opacity: 0.8;
+  cursor: default;
+}
+
+.detail .price-container {
+  display: flex;
+  justify-content: space-between;
+}
