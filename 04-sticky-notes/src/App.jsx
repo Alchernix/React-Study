@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useImmerReducer } from "use-immer";
 import "./App.css";
 
@@ -8,18 +8,21 @@ const initialBoards = [
     style: { backgroundColor: "burlywood", borderColor: "bisque" },
     notes: [],
     currentNoteIdx: 0,
+    lastZIndex: 0,
   },
   {
     id: 2,
     style: { backgroundColor: "#333", borderColor: "lightslategray" },
     notes: [],
     currentNoteIdx: 0,
+    lastZIndex: 0,
   },
   {
     id: 3,
     style: { backgroundColor: "darkolivegreen", borderColor: "lightgray" },
     notes: [],
     currentNoteIdx: 0,
+    lastZIndex: 0,
   },
 ];
 
@@ -36,9 +39,17 @@ function Board({ board, children }) {
   );
 }
 
-function Note({ note, onEditContent, onMove, onRemove }) {
+function Note({
+  note,
+  board,
+  handleChangeBoardZIndex,
+  onEditContent,
+  onMove,
+  onRemove,
+}) {
   const [isEditing, setIsEditing] = useState(false);
   const [lastCoordinates, setLastCoordinates] = useState(null);
+  const ref = useRef(null);
 
   function handleMouseDown(e) {
     e.target.setPointerCapture(e.pointerId);
@@ -46,6 +57,9 @@ function Note({ note, onEditContent, onMove, onRemove }) {
       x: e.clientX,
       y: e.clientY,
     });
+    console.log(board);
+    ref.current.style.zIndex = board.lastZIndex + 1;
+    handleChangeBoardZIndex();
   }
 
   function handleMouseMove(e) {
@@ -63,7 +77,7 @@ function Note({ note, onEditContent, onMove, onRemove }) {
   }
 
   return (
-    <div className="note" style={note.style}>
+    <div ref={ref} className="note" style={note.style}>
       <div
         className="note-handle"
         onPointerDown={handleMouseDown}
@@ -115,6 +129,12 @@ export default function App() {
     });
   }
 
+  function handleChangeBoardZIndex() {
+    dispatch({
+      type: "change_board_z_index",
+    });
+  }
+
   function handleAddNote() {
     dispatch({
       type: "add_note",
@@ -162,6 +182,8 @@ export default function App() {
           <Note
             key={note.id}
             note={note}
+            board={currentBoard}
+            handleChangeBoardZIndex={handleChangeBoardZIndex}
             onEditContent={handleEditNoteContent}
             onMove={handleMoveNote}
             onRemove={handleRemoveNote}
@@ -179,6 +201,13 @@ function boardsReducer(draft, action) {
       draft.currentBoardId = action.boardId;
       break;
     }
+    case "change_board_z_index": {
+      const board = draft.boards.find(
+        (board) => board.id === draft.currentBoardId
+      );
+      board.lastZIndex = board.lastZIndex + 1;
+      break;
+    }
     case "add_note": {
       const board = draft.boards.find(
         (board) => board.id === draft.currentBoardId
@@ -188,9 +217,10 @@ function boardsReducer(draft, action) {
       board.notes.push({
         id: newNoteId,
         content: "",
-        style: { top: "150px", left: "225px" },
+        style: { top: "150px", left: "225px", zIndex: board.lastZIndex },
       });
       board.currentNoteIdx = newNoteId;
+      board.lastZIndex = board.lastZIndex + 1;
       break;
     }
     case "edit_note_content": {

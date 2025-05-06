@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 
 const quizs = [
   { id: 0, question: "CPU는 컴퓨터의 중앙처리장치이다.", answer: "O" },
@@ -22,6 +22,7 @@ const quizs = [
 ];
 
 function Timer({ timeLeft }) {
+  // console.log(timeLeft);
   return (
     <div className="timer-container">
       <div
@@ -81,13 +82,19 @@ export default function Main() {
   const [quizNum, setQuizNum] = useState(0);
   const [score, setScore] = useState(0);
   const [result, setResult] = useState(null);
+
   const [timeLeft, setTimeLeft] = useState(10000);
+  const hasAnswered = useRef(false);
+  const [isQuizDone, setIsQuizDone] = useState(false);
 
   const quiz = quizs[quizNum];
   let content;
 
   function handleAnswer(e) {
-    if (quiz.answer === e.target.textContent) {
+    if (hasAnswered.current) return;
+    hasAnswered.current = true;
+
+    if (e && quiz.answer === e.target.textContent) {
       setScore((score) => score + 1);
       setResult("O");
     } else {
@@ -96,34 +103,51 @@ export default function Main() {
 
     setTimeout(() => {
       setResult(null);
-      setQuizNum((quizNum) => quizNum + 1);
+      if (quizNum < quizs.length - 1) {
+        setQuizNum((quizNum) => quizNum + 1);
+      } else {
+        setIsQuizDone(true);
+      }
     }, 1000);
   }
 
   function handleReset() {
     setQuizNum(0);
     setScore(0);
+    setIsQuizDone(false);
   }
 
-  if (result) {
-    content = <Result result={result} />;
-  } else if (quizNum >= quizs.length) {
+  useEffect(() => {
+    setTimeLeft(10000);
+    hasAnswered.current = false;
+
+    const timerId = setInterval(() => {
+      setTimeLeft((timeLeft) => Math.max(timeLeft - 100, 0));
+    }, 100);
+    return () => {
+      clearInterval(timerId);
+    };
+  }, [quizNum]);
+
+  useEffect(() => {
+    if (timeLeft === 0 && !hasAnswered.current) {
+      handleAnswer();
+    }
+  }, [timeLeft]);
+
+  if (isQuizDone) {
     content = <TotalResult score={score} handleReset={handleReset} />;
+  } else if (result) {
+    content = <Result result={result} />;
   } else {
     content = (
       <>
+        <Timer timeLeft={timeLeft} />
         <Question question={quiz.question} questionNum={quizNum} />
         <Answers handleAnswer={handleAnswer} />
       </>
     );
   }
-
-  // const timer = setInterval(() => {
-  //   setTimeLeft((timeLeft) => timeLeft - 100);
-  //   if (timeLeft <= 0) {
-  //     clearInterval(timer);
-  //   }
-  // }, 100);
 
   return <main>{content}</main>;
 }
