@@ -1,275 +1,167 @@
-import { createContext } from "react";
-import { useState, useContext } from "react";
-import { itemdata, category } from "./data";
-import { BasketProvider, useBasket, useBasketDispatch } from "./Context.jsx";
-import "./App.css";
+import {
+  NavLink,
+  Link,
+  Outlet,
+  useLoaderData,
+  useParams,
+} from "react-router-dom";
+import { createContext, useContext } from "react";
+import logo from "./assets/logo.png";
 
-const PageContextHandler = createContext(null);
+const ProductsContext = createContext();
 
 function Header() {
-  const setPage = useContext(PageContextHandler);
-  const basket = useBasket();
-
   return (
-    <header>
-      <h1 onClick={() => setPage("메인")}>쇼핑몰</h1>
-      <div className="search-container">
-        <input type="text" />
-        <i className="fa-solid fa-magnifying-glass"></i>
+    <header className="flex box-border px-8 xl:px-30 items-center justify-between gap-4">
+      <Link to="/">
+        <img src={logo} alt="logo" className="w-30" />
+      </Link>
+      <div className="flex grow gap-4 items-center border-1 border-purple-500 rounded-md px-3 py-2">
+        <input type="text" className="grow" />
+        <i className="fa-solid fa-magnifying-glass text-lg text-purple-500"></i>
       </div>
-      <i
-        className="fa-solid fa-basket-shopping basket-btn"
-        onClick={() => setPage("장바구니")}
-      >
-        {basket.length > 0 && (
-          <div className="notification">{basket.length}</div>
-        )}
-      </i>
+      <i className="fa-solid fa-basket-shopping text-lg"></i>
     </header>
   );
 }
 
-function Category({ currentCategory, onChange }) {
+function Nav() {
   return (
-    <nav>
-      <ul>
-        {category.map((c) => (
-          <li
-            key={c}
-            onClick={() => {
-              onChange(c);
-            }}
-            className={c === currentCategory ? "selected" : ""}
+    <nav className="border-y-2 border-y-gray-100">
+      <ul className="flex flex-column justify-center items-stretch gap-7 h-full">
+        <li>
+          <NavLink
+            to="/men%27s%20clothing"
+            className={({ isActive }) =>
+              isActive
+                ? "text-purple-500 h-full block border-b-2 border-b-purple-500 flex items-center"
+                : "h-full flex items-center text-gray-700"
+            }
           >
-            {c}
-          </li>
-        ))}
+            men's clothing
+          </NavLink>
+        </li>
+        <li>
+          <NavLink
+            to="/women%27s%20clothing"
+            className={({ isActive }) =>
+              isActive
+                ? "text-purple-500 h-full block border-b-2 border-b-purple-500 flex items-center"
+                : "h-full flex items-center text-gray-700"
+            }
+          >
+            women's clothing
+          </NavLink>
+        </li>
+        <li>
+          <NavLink
+            to="/jewelery"
+            className={({ isActive }) =>
+              isActive
+                ? "text-purple-500 h-full block border-b-2 border-b-purple-500 flex items-center"
+                : "h-full flex items-center text-gray-700"
+            }
+          >
+            jewelery
+          </NavLink>
+        </li>
+        <li>
+          <NavLink
+            to="/electronics"
+            className={({ isActive }) =>
+              isActive
+                ? "text-purple-500 h-full block border-b-2 border-b-purple-500 flex items-center"
+                : "h-full flex items-center text-gray-700"
+            }
+          >
+            electronics
+          </NavLink>
+        </li>
       </ul>
     </nav>
   );
 }
 
-function MainItem({ item, setCurrentItemId }) {
-  const setPage = useContext(PageContextHandler);
-
+function Footer() {
   return (
-    <div
-      className="main-item"
-      onClick={() => {
-        setCurrentItemId(item.id);
-        setPage("상세보기");
-      }}
-    >
-      <div className="img-container">
-        <img src={item.imgUrl} alt={item.name} />
-      </div>
-      <div className="item-name">{item.name}</div>
-      <div className="price">{item.price}원</div>
-      <div>
-        <i className="fa-solid fa-star"></i> {item.rating}
-      </div>
-    </div>
+    <footer className="bg-gray-100 flex items-center justify-center">
+      <div className="text-gray-500">@Footer</div>
+    </footer>
   );
 }
 
-function Detail({ item }) {
-  const [itemCnt, setItemCnt] = useState(0);
-  const totalPrice = item.price * itemCnt;
-  const dispatch = useBasketDispatch();
-
+// 제품 목록 페이지
+export function Products() {
+  const { category } = useParams();
+  let products = useContext(ProductsContext);
+  if (category) {
+    products = products.filter((product) => product.category === category);
+  }
   return (
-    <main className="detail">
-      <div className="detail-layout-container">
-        <div className="img-container">
-          <img src={item.imgUrl} alt={item.name} />
-        </div>
-        <div className="detail-text">
-          <div className="detail-inner1">
-            <div className="item-name">{item.name}</div>
-            <div className="price">{item.price}원</div>
-            <div>
-              <i className="fa-solid fa-star"></i> {item.rating}
+    <main className="grid w-full grid-cols-[repeat(auto-fit,_minmax(200px,_1fr))] xl:grid-cols-5 gap-5 px-8 xl:px-30 py-4">
+      {products.map((product) => (
+        <Link
+          to={"/" + product.category + "/products/" + product.id}
+          key={product.id}
+        >
+          <div className="flex flex-col gap-2">
+            <div className="h-50 overflow-hidden">
+              <img
+                src={product.image}
+                alt={product.title}
+                className="object-contain size-full"
+              />
             </div>
+            <div>{product.title}</div>
+            <div className="font-bold">{product.price}$</div>
           </div>
-          <div className="detail-inner2">
-            <div className="btn-container">
-              <button
-                onClick={() => {
-                  if (itemCnt - 1 >= 0) {
-                    setItemCnt((c) => c - 1);
-                  }
-                }}
-              >
-                -
-              </button>
-              <div>{itemCnt}</div>
-              <button onClick={() => setItemCnt((c) => c + 1)}>+</button>
-            </div>
-            <div className="price-container">
-              <div>총 상품 금액</div>
-              <div className="price">{totalPrice}원</div>
-            </div>
-            <button
-              disabled={!(itemCnt > 0)}
-              className="put-in-basket-btn"
-              onClick={() => {
-                setItemCnt(0);
-                dispatch({
-                  type: "add_item",
-                  itemId: item.id,
-                  cnt: itemCnt,
-                });
-              }}
-            >
-              장바구니에 담기
-            </button>
-          </div>
-        </div>
-      </div>
+        </Link>
+      ))}
     </main>
   );
 }
 
-function Basket() {
-  const basket = useBasket();
-  const totalPrice = basket.reduce((acc, item) => {
-    const itemDetail = itemdata.find((d) => d.id === item.itemId);
-    return acc + itemDetail.price * item.cnt;
-  }, 0);
-  const content =
-    basket.length > 0 ? (
-      <>
-        {basket.map((item) => (
-          <BasketItem key={item.id} item={item} />
-        ))}
-
-        <div className="price-container">
-          <div>총 금액</div>
-          <div className="price">{totalPrice}원</div>
-        </div>
-
-        <button className="order-btn">주문하기</button>
-      </>
-    ) : (
-      <div className="no-item-text">
-        <div>장바구니에 상품이 없습니다.</div>
-      </div>
-    );
-  return <div className="basket">{content}</div>;
-}
-
-function BasketItem({ item }) {
-  const dispatch = useBasketDispatch();
-  const itemDetail = itemdata.find((d) => d.id === item.itemId);
-  const totalPrice = itemDetail.price * item.cnt;
-
+// 제품 상세 페이지
+export function Product() {
+  const product = useLoaderData();
   return (
-    <div className="basket-item">
-      <div className="img-container">
-        <img src={itemDetail.imgUrl} alt={itemDetail.name} />
+    <div className="grid grid-cols-2 gap-4 px-10 xl:px-80 items-center">
+      <div className="h-70 overflow-hidden shrink-0">
+        <img
+          src={product.image}
+          alt={product.title}
+          className="object-contain size-full"
+        />
       </div>
-      <div className="item-name">{itemDetail.name}</div>
-      <div className="btn-container">
-        <button
-          onClick={() => {
-            if (item.cnt - 1 > 0) {
-              dispatch({
-                type: "change_cnt",
-                itemId: item.itemId,
-                cnt: item.cnt - 1,
-              });
-            } else {
-              dispatch({
-                type: "remove_item",
-                itemId: item.itemId,
-              });
-            }
-          }}
-        >
-          -
-        </button>
-        <div>{item.cnt}</div>
-        <button
-          onClick={() =>
-            dispatch({
-              type: "change_cnt",
-              itemId: item.itemId,
-              cnt: item.cnt + 1,
-            })
-          }
-        >
-          +
+      <div className="flex flex-col gap-4">
+        <div className="text-lg font-bold">{product.title}</div>
+        <div>{product.description}</div>
+        <div className="font-bold">{product.price}$</div>
+        <button className="font-bold text-white bg-green-500 py-3 rounded-md cursor-pointer">
+          Add to Cart
         </button>
       </div>
-      <div>{totalPrice}원</div>
     </div>
   );
 }
 
-function loadItems(category) {
-  let items;
-  if (category === "전체") {
-    items = itemdata;
-  } else {
-    items = itemdata.filter((item) => item.category === category);
-  }
-  return items;
-}
+// async function addToCart() {
+//   const response = await fetch("https://fakestoreapi.com/carts/user/1");
+//   const cart = await response.json();
+//   console.log(cart);
+// }
 
 export default function App() {
-  const [currentCategory, setCurrentCategory] = useState("전체");
-  const [currentPage, setCurrentPage] = useState("메인"); // 메인, 상세보기, 장바구니 - 나중에 리엑트 라우터로 리펙토링 예정
-  const [currentItemId, setCurrentItemId] = useState(null);
-
-  const items = loadItems(currentCategory);
-  let content;
-
-  switch (currentPage) {
-    case "메인":
-      content = (
-        <div className="layout-container">
-          <Header />
-          <Category
-            currentCategory={currentCategory}
-            onChange={setCurrentCategory}
-          />
-          <main className="main">
-            <div className="item-container">
-              {items.map((item) => (
-                <MainItem
-                  key={item.id}
-                  item={item}
-                  setCurrentItemId={setCurrentItemId}
-                />
-              ))}
-            </div>
-          </main>
-        </div>
-      );
-      break;
-    case "상세보기":
-      const item = itemdata.find((item) => item.id === currentItemId);
-
-      content = (
-        <div className="layout-container-detail">
-          <Header />
-          <Detail item={item} />
-        </div>
-      );
-      break;
-    case "장바구니":
-      content = (
-        <div className="layout-container-basket">
-          <Header />
-          <Basket />
-        </div>
-      );
-      break;
-  }
+  const productsData = useLoaderData();
 
   return (
-    <PageContextHandler.Provider value={setCurrentPage}>
-      <BasketProvider>{content}</BasketProvider>
-    </PageContextHandler.Provider>
+    <ProductsContext.Provider value={productsData}>
+      <div className="grid grid-rows-[100px_70px_1fr_50px] min-h-screen w-">
+        <Header />
+        <Nav />
+        <Outlet context={productsData} />
+        <Footer />
+      </div>
+    </ProductsContext.Provider>
   );
 }
